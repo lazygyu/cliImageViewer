@@ -46,6 +46,12 @@ func Dithering(img image.Image) image.Image {
 				}
 			}
 			if y < height-1 {
+				if x > 0 {
+					origin[(y+1)*width+x-1] = byte(int(origin[(y+1)*width+x-1]) + error)
+				}
+				if x < width-1 {
+					origin[(y+1)*width+x+1] = byte(int(origin[(y+1)*width+x+1]) + error)
+				}
 				origin[(y+1)*width+x] = byte(int(origin[(y+1)*width+x]) + error)
 			}
 		}
@@ -56,12 +62,12 @@ func Dithering(img image.Image) image.Image {
 func toByteArray(img image.Image) []byte {
 	width := img.Bounds().Max.X
 	height := img.Bounds().Max.Y
-  var cl color.Color
+	var cl color.Color
 
 	origin := make([]byte, width*height)
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-      cl = img.At(x, y)
+			cl = img.At(x, y)
 			origin[y*width+x] = color.GrayModel.Convert(cl).(color.Gray).Y
 		}
 	}
