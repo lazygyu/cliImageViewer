@@ -2,7 +2,7 @@
 
 A command line image viewer
 
-![Screen shot](https://imgur.com/EHSKNPN.png)
+![Screen shot](https://i.imgur.com/yoTsRhx.png)
 
 ## Usage
 
