@@ -34,7 +34,7 @@ func PrintImage(width, height int, data *[]byte, invert bool) {
 
   targetPixelValue := byte(0)
   if invert {
-    targetPixelValue = 255
+    targetPixelValue = 255 
   }
 
 	for y := 0; y < yChunk; y++ {

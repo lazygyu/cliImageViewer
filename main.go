@@ -84,14 +84,11 @@ func main() {
     }
   }
 
-  nimg := image.NewNRGBA(image.Rect(0, 0, img.Bounds().Dx(), img.Bounds().Dy()))
+  nimg := toGrayscale(img)
   draw.Draw(nimg, nimg.Bounds(), img, img.Bounds().Min, draw.Src)
 
-
   // dithering
-  result := Dithering(nimg)
-  // turn into a byte array
-  pixels := toByteArray(result)
+  result := Dithering(*nimg)
   // print out
-  dotscreen.PrintImage(img.Bounds().Max.X, img.Bounds().Max.Y, &pixels, *invert)
+  dotscreen.PrintImage(img.Bounds().Max.X, img.Bounds().Max.Y, &result, *invert)
 }

@@ -1,83 +1,86 @@
 package main
 
 import (
-	"image"
-	"image/color"
+  "image"
+  "image/draw"
 )
 
-func Dithering(img image.Image) image.Image {
-	var oldPixel, newPixel byte
-	var error int
-	var idx int
-	width := img.Bounds().Max.X
-	height := img.Bounds().Max.Y
+func Dithering(img image.Gray) []byte {
+  var oldPixel, newPixel int
+  var error int
+  width := img.Bounds().Max.X
+  height := img.Bounds().Max.Y
 
-	origin := toByteArray(img)
-	result := image.NewGray(image.Rectangle{Min: image.Pt(0, 0), Max: image.Pt(width, height)})
+  origin := toByteArray(img)
+  result := make([]byte, width * height, width * height)
 
-	var min, max, half byte
+  var min, max byte
+  var half int
 
-	min = 255
-	max = 0
-	half = 127
+  min = 255
+  max = 0
+  half = 127
 
-	for i := 0; i < width*height; i++ {
-		if origin[i] < min {
-			min = origin[i]
-		}
-		if origin[i] > max {
-			max = origin[i]
-		}
-	}
+  for i := 0; i < width*height; i++ {
+    if origin[i] < min {
+      min = origin[i]
+    }
+    if origin[i] > max {
+      max = origin[i]
+    }
+  }
 
-	half = byte((int(max) + int(min)) / 2)
+  half = (int(min) + int(max)) / 2
 
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			idx = (y * width) + x
-			oldPixel = origin[y*width+x]
-			newPixel = findColor(oldPixel, half)
-			error = (int(oldPixel) - int(newPixel)) >> 3
-			result.Pix[idx] = newPixel
-			if x < width-1 {
-				origin[y*width+x+1] = byte(int(origin[y*width+x+1]) + error)
-				if x < width-2 {
-					origin[y*width+x+2] = byte(int(origin[y*width+x+2]) + error)
-				}
-			}
-			if y < height-1 {
-				if x > 0 {
-					origin[(y+1)*width+x-1] = byte(int(origin[(y+1)*width+x-1]) + error)
-				}
-				if x < width-1 {
-					origin[(y+1)*width+x+1] = byte(int(origin[(y+1)*width+x+1]) + error)
-				}
-				origin[(y+1)*width+x] = byte(int(origin[(y+1)*width+x]) + error)
-			}
-		}
-	}
-	return result
+  e := make([]int, width*2)
+  m := []int{0, 1, width-2, width-1, width, 2*width-1}
+
+  l := len(origin)
+
+  for idx := 0; idx < l; idx++ {
+    oldPixel = int(origin[idx]) + e[0]
+    e = append(e[1:], 0)
+    newPixel = findColor(oldPixel, half)
+    error=(oldPixel - newPixel)>>3
+    result[idx] = byte(newPixel / 255)
+    for _, k := range m {
+      e[k] += error
+    }
+  }
+  return result
 }
 
-func toByteArray(img image.Image) []byte {
-	width := img.Bounds().Max.X
-	height := img.Bounds().Max.Y
-	var cl color.Color
-
-	origin := make([]byte, width*height)
-	for y := 0; y < height; y++ {
-		for x := 0; x < width; x++ {
-			cl = img.At(x, y)
-			origin[y*width+x] = color.GrayModel.Convert(cl).(color.Gray).Y
-		}
-	}
-	return origin
+func addV(target *[]byte, pos, v int) {
+  arr := *target
+  if (pos >= len(arr)) {
+    return
+  }
+  arr[pos] = byte(int(arr[pos]) + v)
 }
 
-func findColor(c, half byte) byte {
-	if c > half {
-		return 255
-	} else {
-		return 0
-	}
+func toByteArray(img image.Gray) []byte {
+  width := img.Bounds().Dx()
+  height := img.Bounds().Dy()
+
+  origin := make([]byte, width*height)
+  for y := 0; y < height; y++ {
+    for x := 0; x < width; x++ {
+      origin[y*width+x] = img.GrayAt(x, y).Y
+    }
+  }
+  return origin
+}
+
+func toGrayscale(img image.Image) *image.Gray {
+  result := image.NewGray(img.Bounds())
+  draw.Draw(result, result.Bounds(), img, img.Bounds().Min, draw.Src)
+  return result
+}
+
+func findColor(c int, half int) int {
+  if c > half {
+    return 255
+  } else {
+    return 0
+  }
 }
