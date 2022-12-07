@@ -7,5 +7,9 @@ A command line image viewer
 ## Usage
 
 ```
-> ./gv {image_file_path_name}
+> ./gv [options] {image_file_path_name}
 ```
+
+### options
+
+`-i` : invert the image brightness
