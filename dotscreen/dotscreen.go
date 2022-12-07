@@ -42,7 +42,7 @@ func getPixel(width int, height int, data *[]byte, x int, y int) byte {
 	return (*data)[y*width+x]
 }
 
-func PrintImage(width, height int, data *[]byte) {
+func PrintImage(width, height int, data *[]byte, invert bool) {
 	var pixel byte
 	var ch uint
 	var sx, sy, xlimit, ylimit int
@@ -56,6 +56,11 @@ func PrintImage(width, height int, data *[]byte) {
 		yChunk++
 	}
 
+  targetPixelValue := byte(0)
+  if invert {
+    targetPixelValue = 255
+  }
+
 	for y := 0; y < yChunk; y++ {
 		for x := 0; x < xChunk; x++ {
 			ch = 0
@@ -67,7 +72,7 @@ func PrintImage(width, height int, data *[]byte) {
 			for i := 0; i < xlimit; i++ {
 				for j := 0; j < ylimit; j++ {
 					pixel = getPixel(width, height, data, sx+i, sy+j)
-					if pixel > 0 {
+					if pixel != targetPixelValue {
 						ch |= dotPoisitions[i+(j*2)]
 					}
 				}

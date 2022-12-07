@@ -8,16 +8,23 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+  "flag"
 
 	"github.com/nfnt/resize"
 )
 
 func main() {
 
-	args := os.Args[1:]
+  invert := flag.Bool("i", false, "Invert the image (default: false)")
+
+  flag.Parse()
+
+	args := flag.Args()
 
 	if len(args) < 1 {
-		log.Fatal("Usage: gv filename")
+		fmt.Println("Usage: gv [options] filename")
+    flag.PrintDefaults()
+    os.Exit(0)
 	}
 
 	filename := args[0]
@@ -38,9 +45,6 @@ func main() {
 	}
 
 	d := dotscreen.New()
-	fmt.Printf("screen width: %d, height: %d\n", d.Width, d.Height)
-
-	fmt.Printf("image width: %d, height: %d\n", img.Bounds().Max.X, img.Bounds().Max.Y)
 
 	// resize to fit
 	if img.Bounds().Max.X > d.Width && img.Bounds().Max.Y > d.Height {
@@ -66,12 +70,11 @@ func main() {
 		h := d.Height
 		img = resize.Resize(uint(w), uint(h), img, resize.Lanczos2)
 	}
-	fmt.Printf("after resize width: %d, height: %d\n", img.Bounds().Max.X, img.Bounds().Max.Y)
 
 	// dithering
 	result := Dithering(img)
 	// turn into a byte array
 	pixels := toByteArray(result)
 	// print out
-	dotscreen.PrintImage(img.Bounds().Max.X, img.Bounds().Max.Y, &pixels)
+	dotscreen.PrintImage(img.Bounds().Max.X, img.Bounds().Max.Y, &pixels, *invert)
 }
