@@ -2,33 +2,9 @@ package dotscreen
 
 import (
 	"fmt"
-	"log"
-	"os"
-
-	"golang.org/x/term"
 )
 
 var dotPoisitions []uint = []uint{1, 8, 2, 16, 4, 32, 64, 128}
-
-type Dot struct {
-	Width  int
-	Height int
-}
-
-func New() *Dot {
-	d := Dot{
-		Width:  0,
-		Height: 0,
-	}
-
-	width, height, err := term.GetSize(int(os.Stdout.Fd()))
-	if err != nil {
-		log.Fatal(err)
-	}
-	d.Width = width * 2
-	d.Height = height * 5
-	return &d
-}
 
 func getPixel(width int, height int, data *[]byte, x int, y int) byte {
 	if x >= width || x < 0 {

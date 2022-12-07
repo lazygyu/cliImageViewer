@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 )
@@ -33,8 +32,6 @@ func Dithering(img image.Image) image.Image {
 
 	half = byte((int(max) + int(min)) / 2)
 
-	fmt.Printf("min: %d , max: %d , half: %d\n", min, max, half)
-
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
 			idx = (y * width) + x
@@ -59,11 +56,13 @@ func Dithering(img image.Image) image.Image {
 func toByteArray(img image.Image) []byte {
 	width := img.Bounds().Max.X
 	height := img.Bounds().Max.Y
+  var cl color.Color
 
 	origin := make([]byte, width*height)
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			origin[y*width+x] = color.GrayModel.Convert(img.At(x, y)).(color.Gray).Y
+      cl = img.At(x, y)
+			origin[y*width+x] = color.GrayModel.Convert(cl).(color.Gray).Y
 		}
 	}
 	return origin
