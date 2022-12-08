@@ -1,0 +1,84 @@
+name: Build
+
+on: 
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Build
+        run: go build -v .
+
+      - if: matrix.os == 'windows-latest'
+        name: 'zip windows'
+        run: |
+          $compress = @{ 
+            Path = "gv*", "README.md" 
+            CompressionLevel = "Fastest" 
+            DestinationPath = ".\gv_windows.zip" 
+          }
+          Compress-Archive @compress
+
+      - if: matrix.os == 'macos-latest'
+        name: 'zip macos'
+        run: zip --junk-paths gv_macos gv* README.md
+
+      - if: matrix.os == 'ubuntu-latest'
+        name: 'zip ubuntu'
+        run: zip --junk-paths gv_ubuntu gv* README.md
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          allowUpdates: true
+          draft: false
+          prerelease: false
+          append_body: true
+      - name: Uploading windows assets
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_name: gv_windows.zip
+          asset_path: ./gv_windows.zip
+          asset_content_type: application/zip
+      - name: Uploading macos assets
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_name: gv_macos.zip
+          asset_path: ./gv_macos.zip
+          asset_content_type: application/zip
+      - name: Uploading ubuntu assets
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./gv_ubuntu.zip
+          asset_name: gv_ubuntu.zip
+          asset_content_type: application/zip
