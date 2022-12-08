@@ -1,4 +1,4 @@
-package dotscreen
+package main
 
 import (
 	"fmt"
@@ -32,10 +32,10 @@ func PrintImage(width, height int, data *[]byte, invert bool) {
 		yChunk++
 	}
 
-  targetPixelValue := byte(0)
-  if invert {
-    targetPixelValue = 1 
-  }
+	targetPixelValue := byte(0)
+	if invert {
+		targetPixelValue = 1
+	}
 
 	for y := 0; y < yChunk; y++ {
 		for x := 0; x < xChunk; x++ {
