@@ -19,6 +19,11 @@ import (
 func main() {
 
   invert := flag.Bool("i", false, "Invert the image (default: false)")
+  var maxWidth int
+  var maxHeight int
+
+  flag.IntVar(&maxWidth, "w", 0, "Limit the width of the image (if the limitation is larger than the screen width, it will be ignored)")
+  flag.IntVar(&maxHeight, "h", 0, "Limit the height of the image (if the limitation is larger than the screen height, it will be ignored)")
 
   flag.Parse()
 
@@ -49,14 +54,25 @@ func main() {
 
   stdout := os.Stdout.Fd()
 
-  if term.IsTerminal(int(stdout)) {
+  if (term.IsTerminal(int(stdout))) {
     width, height, err := term.GetSize(int(stdout))
-
     if err != nil {
       log.Fatal("Cannot get the size of the terminal")
     }
     width *= 2
     height *= 5
+    if maxWidth == 0 || width < maxWidth {
+      maxWidth = width
+    }
+    if maxHeight == 0 || height < maxHeight {
+      maxHeight = height
+    }
+  }
+
+  if maxWidth > 0 && maxHeight > 0 {
+    width := maxWidth
+    height := maxHeight
+
 
     // resize to fit
     if img.Bounds().Max.X > width && img.Bounds().Max.Y > height {
