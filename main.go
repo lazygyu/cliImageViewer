@@ -1,15 +1,17 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"image"
-	"image/draw"
-	_ "image/gif"
-	_ "image/jpeg"
-	_ "image/png"
-	"log"
-	"os"
+  "fmt"
+  "image"
+  _ "image/jpeg"
+  _ "image/png"
+  _ "image/gif"
+  "image/draw"
+  "log"
+  "os"
+  "io"
+  "bufio"
+  "flag"
 
 	"github.com/nfnt/resize"
 	"golang.org/x/term"
@@ -28,21 +30,28 @@ func main() {
 
 	args := flag.Args()
 
-	if len(args) < 1 {
-		fmt.Println("Usage: gv [options] filename")
-		flag.PrintDefaults()
-		os.Exit(0)
-	}
+  stat, _ := os.Stdin.Stat()
+  var f io.Reader
 
-	filename := args[0]
+  if (stat.Mode() & os.ModeCharDevice) == 0 {
+    // from pipe
+    f = bufio.NewReader(os.Stdin)
+  } else {
+    if len(args) < 1 {
+      fmt.Println("Usage: gv [options] filename")
+      flag.PrintDefaults()
+      os.Exit(0)
+    }
 
-	// open file
-	f, err := os.Open(filename)
-	if err != nil {
-		log.Fatal("cannot open the file")
-	}
+    filename := args[0]
 
-	defer f.Close()
+    // open file
+    f, err := os.Open(filename)
+    if err != nil {
+      log.Fatal("cannot open the file")
+    }
+    defer f.Close()
+  }
 
 	// load img
 	img, _, err := image.Decode(f)
