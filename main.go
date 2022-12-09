@@ -46,11 +46,16 @@ func main() {
     filename := args[0]
 
     // open file
-    f, err := os.Open(filename)
+    fd, err := os.Open(filename)
     if err != nil {
       log.Fatal("cannot open the file")
     }
-    defer f.Close()
+    fStat, err := fd.Stat()
+    if err != nil || fStat.Size() == 0 {
+      log.Fatal("Invalid file")
+    }
+    defer fd.Close()
+    f = bufio.NewReader(fd)
   }
 
 	// load img
