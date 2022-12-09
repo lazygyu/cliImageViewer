@@ -12,8 +12,15 @@ A command line image viewer
 
 ## Usage
 
+### Providing a file name to show
 ```bash
-> ./gv [options] {image_file_path_name}
+> gv [options] {image_file_path_name}
+```
+
+### Through a pipe
+
+```bash
+> cat {image_file_path_name} | gv [options]
 ```
 
 ### options
